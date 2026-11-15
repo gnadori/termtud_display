@@ -46,6 +46,7 @@ export function createMicrosoftProvider(): OAuthProvider {
 
 const DEFAULT_ALLOWED_ADMIN_EMAILS = [
   'nadori@akg.hu',
+  'nadori@akgbudapest.onmicrosoft.com',
   'chrenko.timea@akg.hu',
   'varhegyi.barbara@akg.hu',
   'hegymegi.mariann@akg.hu',

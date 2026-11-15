@@ -7,6 +7,7 @@ service cloud.firestore {
         && request.auth.token.email != null
         && request.auth.token.email.lower() in [
           'nadori@akg.hu',
+          'nadori@akgbudapest.onmicrosoft.com',
           'chrenko.timea@akg.hu',
           'varhegyi.barbara@akg.hu',
           'hegymegi.mariann@akg.hu',
