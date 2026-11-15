@@ -31,11 +31,12 @@ jobs:
         run: npm ci
 
       - name: Prepare .env from TERMTUD_DISPLAY_VAR
-        if: ${{ (secrets.TERMTUD_DISPLAY_VAR || vars.TERMTUD_DISPLAY_VAR) != '' }}
         env:
           RAW_ENV: ${{ secrets.TERMTUD_DISPLAY_VAR || vars.TERMTUD_DISPLAY_VAR }}
         run: |
-          printf '%s\n' "$RAW_ENV" | sed 's/ *= */=/' | grep -E '^[A-Za-z0-9_]+=' > .env
+          if [ -n "$RAW_ENV" ]; then
+            printf '%s\n' "$RAW_ENV" | sed 's/ *= */=/' | grep -E '^[A-Za-z0-9_]+=' > .env
+          fi
 
       - name: Build
         run: npm run build
