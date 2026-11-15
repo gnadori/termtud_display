@@ -27,7 +27,7 @@ export const DEFAULT_SETTINGS: DisplaySettings = {
   latitude: 47.4979,
   longitude: 19.0402,
   locationName: 'Budapest',
-  schoolTitle: 'Természettudományi Tanári',
+  schoolTitle: 'Természettudományi tanári',
   sleepEnabled: false,
   sleepStart: '20:00',
   sleepEnd: '06:30',

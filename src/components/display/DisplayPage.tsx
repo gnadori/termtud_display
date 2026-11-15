@@ -49,7 +49,7 @@ const SLIDE_LABELS: Record<CarouselSlideId, string> = {
   weather: 'Időjárás',
   space: 'Űridőjárás',
   nobel: 'Nobel-díjas',
-  funfact: 'Fun Fact',
+  funfact: 'Fun fact',
 };
 
 function toDateStr(d: Date): string {

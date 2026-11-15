@@ -20,7 +20,7 @@ export function FunFactSlide({ fact }: Props) {
             <p className="text-xs font-semibold tracking-widest text-violet-400 uppercase">
               Tudtad-e? • Napi tudományos érdekesség
             </p>
-            <h2 className="text-2xl font-bold text-white lg:text-3xl">Napi Fun Fact</h2>
+            <h2 className="text-2xl font-bold text-white lg:text-3xl">Napi fun fact</h2>
           </div>
         </div>
         <div className="flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/15 px-4 py-1.5 text-sm font-semibold text-violet-300">

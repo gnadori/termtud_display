@@ -66,7 +66,7 @@ const SLIDE_OPTIONS: Array<{ id: CarouselSlideId; label: string }> = [
   { id: 'weather', label: 'Időjárási térkép frontokkal' },
   { id: 'space', label: 'Napfolt- és napszél-tevékenység' },
   { id: 'nobel', label: 'A nap természettudományi Nobel-díjasa' },
-  { id: 'funfact', label: 'Napi Fun Fact' },
+  { id: 'funfact', label: 'Napi fun fact' },
 ];
 
 function todayStr(): string {
@@ -291,7 +291,7 @@ export function AdminPage() {
               <Atom className="h-7 w-7" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Természettudományi Admin</h1>
+              <h1 className="text-xl font-bold text-white">Természettudományi admin</h1>
               <p className="text-xs text-slate-400">
                 Hirdetmények, naptár és kijelző kezelése
               </p>
@@ -300,7 +300,7 @@ export function AdminPage() {
 
           {!isFirebaseConfigured && (
             <div className="mb-5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs leading-relaxed text-amber-200">
-              <strong>Helyi Demó Mód:</strong> A Firebase környezeti változók még nincsenek
+              <strong>Helyi demó mód:</strong> A Firebase környezeti változók még nincsenek
               beállítva (<code>.env</code>). A módosítások a böngészőben mentődnek, hogy
               helyben ki tudd próbálni a felületet.
             </div>
@@ -328,7 +328,7 @@ export function AdminPage() {
               className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-cyan-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-cyan-500"
             >
               <LogIn className="h-5 w-5" />
-              Belépés Demó Adminként
+              Belépés demó adminként
             </button>
           )}
 
@@ -356,9 +356,9 @@ export function AdminPage() {
               <Atom className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">Kijelző Admin Felület</h1>
+              <h1 className="text-lg font-bold text-white">Kijelző admin felület</h1>
               <p className="text-xs text-slate-400">
-                {user?.email ? `Bejelentkezve: ${user.email}` : 'Helyi Demó Mód'}
+                {user?.email ? `Bejelentkezve: ${user.email}` : 'Helyi demó mód'}
               </p>
             </div>
           </div>
@@ -390,7 +390,7 @@ export function AdminPage() {
           {[
             { id: 'announcements' as const, label: 'Hirdetmények', icon: Megaphone },
             { id: 'events' as const, label: 'Naptár (7 napos sáv)', icon: CalendarIcon },
-            { id: 'funfacts' as const, label: 'Egyéni Fun Factek', icon: Lightbulb },
+            { id: 'funfacts' as const, label: 'Egyéni fun factek', icon: Lightbulb },
             { id: 'settings' as const, label: 'Kijelző beállítások', icon: Settings },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -706,7 +706,7 @@ export function AdminPage() {
               onSubmit={handleAddFunFact}
               className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 lg:col-span-5"
             >
-              <h2 className="text-base font-bold text-white">Saját Fun Fact hozzáadása</h2>
+              <h2 className="text-base font-bold text-white">Saját fun fact hozzáadása</h2>
               <p className="text-xs text-slate-400">
                 A rendszer alapból tartalmaz 24+ tudományos érdekességet, de itt saját
                 iskolai vagy tananyaghoz kapcsolódó tényeket is felvehetsz.

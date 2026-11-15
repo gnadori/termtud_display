@@ -16,7 +16,7 @@ export function NobelLaureateSlide({ laureate, loading }: Props) {
           </div>
           <div>
             <p className="text-xs font-semibold tracking-widest text-yellow-400 uppercase">
-              Tudománytörténet • Nobel-díj Archívum
+              Tudománytörténet • Nobel-díj archívum
             </p>
             <h2 className="text-2xl font-bold text-white lg:text-3xl">
               A nap természettudományi Nobel-díjasa
