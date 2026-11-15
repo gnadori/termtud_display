@@ -54,6 +54,10 @@ export interface DisplaySettings {
   longitude: number;
   locationName: string;
   schoolTitle: string;
+  sleepEnabled: boolean;
+  sleepStart: string; // HH:mm
+  sleepEnd: string; // HH:mm
+  sleepWeekends: boolean;
 }
 
 export interface EarthquakeFeature {

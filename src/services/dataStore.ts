@@ -26,6 +26,10 @@ export const DEFAULT_SETTINGS: DisplaySettings = {
   longitude: 19.0402,
   locationName: 'Budapest',
   schoolTitle: 'Természettudományi Tanári',
+  sleepEnabled: false,
+  sleepStart: '20:00',
+  sleepEnd: '06:30',
+  sleepWeekends: false,
 };
 
 const STORAGE_KEYS = {

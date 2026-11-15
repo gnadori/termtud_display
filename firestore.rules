@@ -1,11 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Csak a megadott iskolai Microsoft domainekről bejelentkezett felhasználók írhatnak
+    // Csak a név szerint engedélyezett iskolai adminisztrátorok írhatnak
     function isAdmin() {
       return request.auth != null
         && request.auth.token.email != null
-        && request.auth.token.email.lower().matches('.*@(akg\\.hu|akgbudapest\\.onmicrosoft\\.com)$');
+        && request.auth.token.email.lower() in [
+          'nadori@akg.hu',
+          'chrenko.timea@akg.hu',
+          'varhegyi.barbara@akg.hu',
+          'hegymegi.mariann@akg.hu',
+          'tatai.reka@akg.hu'
+        ];
     }
 
     match /announcements/{docId} {

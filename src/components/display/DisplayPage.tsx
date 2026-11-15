@@ -59,6 +59,29 @@ function toDateStr(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+function parseMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return 0;
+  return h * 60 + m;
+}
+
+function isWithinSleepWindow(now: Date, settings: DisplaySettings): boolean {
+  if (!settings.sleepEnabled) return false;
+  if (settings.sleepWeekends) {
+    const day = now.getDay();
+    if (day === 0 || day === 6) return true;
+  }
+  const curMin = now.getHours() * 60 + now.getMinutes();
+  const startMin = parseMinutes(settings.sleepStart || '20:00');
+  const endMin = parseMinutes(settings.sleepEnd || '06:30');
+  if (startMin === endMin) return false;
+  if (startMin < endMin) {
+    return curMin >= startMin && curMin < endMin;
+  }
+  // Éjszakai átnyúlás (pl. 20:00 -> 06:30)
+  return curMin >= startMin || curMin < endMin;
+}
+
 function formatEventDayLabel(dateStr: string): string {
   const today = new Date();
   const todayStr = toDateStr(today);
@@ -163,9 +186,11 @@ export function DisplayPage() {
   }, [settings.enabledSlides]);
 
   const intervalMs = Math.min(60, Math.max(30, settings.carouselIntervalSeconds)) * 1000;
+  const isSleeping = isWithinSleepWindow(now, settings);
 
-  // Carousel időzítő
+  // Carousel időzítő (alvó módban szünetel)
   useEffect(() => {
+    if (isSleeping) return;
     setProgress(0);
     const startedAt = Date.now();
     const tick = setInterval(() => {
@@ -178,7 +203,7 @@ export function DisplayPage() {
     }, 250);
 
     return () => clearInterval(tick);
-  }, [slideIndex, intervalMs, activeSlides.length]);
+  }, [slideIndex, intervalMs, activeSlides.length, isSleeping]);
 
   // Biztonságos index clamp
   const currentSlideId = activeSlides[slideIndex % activeSlides.length] || 'earthquake';
@@ -231,6 +256,10 @@ export function DisplayPage() {
     day: 'numeric',
     weekday: 'long',
   });
+
+  if (isSleeping) {
+    return <div className="h-screen w-screen cursor-none bg-black" />;
+  }
 
   return (
     <div className="kiosk-screen flex h-screen w-screen flex-col bg-slate-950 text-slate-100">

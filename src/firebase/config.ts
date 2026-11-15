@@ -44,37 +44,28 @@ export function createMicrosoftProvider(): OAuthProvider {
   return provider;
 }
 
+const DEFAULT_ALLOWED_ADMIN_EMAILS = [
+  'nadori@akg.hu',
+  'chrenko.timea@akg.hu',
+  'varhegyi.barbara@akg.hu',
+  'hegymegi.mariann@akg.hu',
+  'tatai.reka@akg.hu',
+];
+
 export function isAuthorizedAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
   const normalized = email.trim().toLowerCase();
 
   const allowedEmailsRaw = import.meta.env.VITE_ALLOWED_ADMIN_EMAILS as string | undefined;
-  if (allowedEmailsRaw && allowedEmailsRaw.trim().length > 0) {
-    const list = allowedEmailsRaw
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    if (list.includes(normalized)) return true;
-  }
+  const emailList =
+    allowedEmailsRaw && allowedEmailsRaw.trim().length > 0
+      ? allowedEmailsRaw
+          .split(',')
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean)
+      : DEFAULT_ALLOWED_ADMIN_EMAILS;
 
-  const allowedDomainRaw = import.meta.env.VITE_ALLOWED_ADMIN_DOMAIN as string | undefined;
-  if (allowedDomainRaw && allowedDomainRaw.trim().length > 0) {
-    const domains = allowedDomainRaw
-      .split(',')
-      .map((d) => d.trim().toLowerCase().replace(/^@/, ''))
-      .filter(Boolean);
-    if (domains.some((domain) => normalized.endsWith(`@${domain}`))) {
-      return true;
-    }
-    if (!allowedEmailsRaw) return false;
-  }
-
-  // Ha sem domain, sem email lista nincs beállítva, bármely sikeres Microsoft belépés engedélyezett
-  if (!allowedDomainRaw && !allowedEmailsRaw) {
-    return true;
-  }
-
-  return false;
+  return emailList.includes(normalized);
 }
 
 export { app, auth, db };

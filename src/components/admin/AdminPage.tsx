@@ -14,6 +14,7 @@ import {
   LogIn,
   LogOut,
   Megaphone,
+  Moon,
   Plus,
   Settings,
   ShieldCheck,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AdminCalendar } from './AdminCalendar';
 import {
   auth,
   createMicrosoftProvider,
@@ -462,122 +464,143 @@ export function AdminPage() {
         {/* 2. Naptár / Események */}
         {activeTab === 'events' && (
           <div className="grid gap-6 lg:grid-cols-12">
-            <form
-              onSubmit={handleAddEvent}
-              className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 lg:col-span-5"
-            >
-              <h2 className="text-base font-bold text-white">Új naptári esemény</h2>
-              <div>
-                <label className="mb-1 block text-xs text-slate-400">Esemény neve</label>
-                <input
-                  type="text"
-                  required
-                  value={evTitle}
-                  onChange={(e) => setEvTitle(e.target.value)}
-                  placeholder="pl. Fizika OKTV 1. forduló"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs text-slate-400">Dátum</label>
-                  <input
-                    type="date"
-                    required
-                    value={evDate}
-                    onChange={(e) => setEvDate(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
-                  />
+            <div className="lg:col-span-6">
+              <AdminCalendar
+                events={events}
+                selectedDate={evDate}
+                onSelectDate={(d) => setEvDate(d)}
+                onDeleteEvent={deleteEvent}
+                todayStr={today}
+                next7EndStr={next7End}
+              />
+            </div>
+
+            <div className="space-y-6 lg:col-span-6">
+              <form
+                onSubmit={handleAddEvent}
+                className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold text-white">Új naptári esemény</h2>
+                  <span className="rounded-lg bg-cyan-500/20 px-2.5 py-1 text-xs font-mono font-semibold text-cyan-300">
+                    {evDate}
+                  </span>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-slate-400">Időpont</label>
-                  <input
-                    type="time"
-                    required
-                    value={evTime}
-                    onChange={(e) => setEvTime(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-xs text-slate-400">Helyszín</label>
+                  <label className="mb-1 block text-xs text-slate-400">Esemény neve</label>
                   <input
                     type="text"
-                    value={evLocation}
-                    onChange={(e) => setEvLocation(e.target.value)}
-                    placeholder="pl. 204-es labor"
+                    required
+                    value={evTitle}
+                    onChange={(e) => setEvTitle(e.target.value)}
+                    placeholder="pl. Fizika OKTV 1. forduló"
                     className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
                   />
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs text-slate-400">Tantárgy / Típus</label>
-                  <select
-                    value={evCategory}
-                    onChange={(e) => setEvCategory(e.target.value as EventCategory)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
-                  >
-                    <option value="fizika">Fizika</option>
-                    <option value="kemia">Kémia</option>
-                    <option value="biologia">Biológia</option>
-                    <option value="foldrajz">Földrajz</option>
-                    <option value="verseny">Verseny</option>
-                    <option value="egyeb">Egyéb</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-slate-400">Dátum</label>
+                    <input
+                      type="date"
+                      required
+                      value={evDate}
+                      onChange={(e) => setEvDate(e.target.value)}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-slate-400">Időpont</label>
+                    <input
+                      type="time"
+                      required
+                      value={evTime}
+                      onChange={(e) => setEvTime(e.target.value)}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-slate-400">Helyszín</label>
+                    <input
+                      type="text"
+                      value={evLocation}
+                      onChange={(e) => setEvLocation(e.target.value)}
+                      placeholder="pl. 204-es labor"
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-slate-400">Tantárgy / Típus</label>
+                    <select
+                      value={evCategory}
+                      onChange={(e) => setEvCategory(e.target.value as EventCategory)}
+                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                    >
+                      <option value="fizika">Fizika</option>
+                      <option value="kemia">Kémia</option>
+                      <option value="biologia">Biológia</option>
+                      <option value="foldrajz">Földrajz</option>
+                      <option value="verseny">Verseny</option>
+                      <option value="egyeb">Egyéb</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-500"
+                >
+                  <Plus className="h-4 w-4" />
+                  Hozzáadás a naptárhoz
+                </button>
+              </form>
+
+              <div className="space-y-2.5">
+                <h3 className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+                  Összes jövőbeli esemény ({events.filter((e) => e.date >= today).length})
+                </h3>
+                <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                  {events
+                    .filter((ev) => ev.date >= today)
+                    .map((ev) => {
+                      const inNext7Days = ev.date >= today && ev.date <= next7End;
+                      return (
+                        <div
+                          key={ev.id}
+                          className={`flex items-center justify-between gap-3 rounded-xl border p-3 ${
+                            inNext7Days
+                              ? 'border-emerald-500/40 bg-emerald-500/5'
+                              : 'border-slate-800 bg-slate-900/60'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="rounded bg-slate-800 px-2 py-0.5 font-mono text-cyan-300">
+                                {ev.date} {ev.time}
+                              </span>
+                              {inNext7Days && (
+                                <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 font-semibold text-emerald-300">
+                                  Kijelzőn látszik
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 text-sm font-bold text-white">{ev.title}</div>
+                            {ev.location && (
+                              <div className="text-xs text-slate-400">{ev.location}</div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => deleteEvent(ev.id)}
+                            className="rounded-lg p-1.5 text-slate-400 hover:bg-red-500/20 hover:text-red-300"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
-              <button
-                type="submit"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-500"
-              >
-                <Plus className="h-4 w-4" />
-                Hozzáadás a naptárhoz
-              </button>
-            </form>
-
-            <div className="space-y-3 lg:col-span-7">
-              <div className="text-xs text-slate-400">
-                A zölddel jelölt események esnek a következő 7 napba ({today} – {next7End}),
-                így ezek jelennek meg a kijelző alsó scrollozó sávjában.
-              </div>
-              {events.map((ev) => {
-                const inNext7Days = ev.date >= today && ev.date <= next7End;
-                return (
-                  <div
-                    key={ev.id}
-                    className={`flex items-center justify-between gap-4 rounded-2xl border p-4 ${
-                      inNext7Days
-                        ? 'border-emerald-500/40 bg-emerald-500/5'
-                        : 'border-slate-800 bg-slate-900/60'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="rounded bg-slate-800 px-2 py-0.5 font-mono text-cyan-300">
-                          {ev.date} {ev.time}
-                        </span>
-                        {inNext7Days && (
-                          <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 font-semibold text-emerald-300">
-                            Kijelzőn látszik
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 font-bold text-white">{ev.title}</div>
-                      {ev.location && (
-                        <div className="text-xs text-slate-400">Helyszín: {ev.location}</div>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => deleteEvent(ev.id)}
-                      className="rounded-lg p-1.5 text-slate-400 hover:bg-red-500/20 hover:text-red-300"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}
@@ -779,6 +802,75 @@ export function AdminPage() {
                   className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
                 />
               </div>
+            </div>
+
+            {/* Éjszakai / képernyő kikapcs idősáv */}
+            <div className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Moon className="h-4 w-4 text-indigo-400" />
+                  <span className="text-sm font-bold text-white">
+                    Képernyő kikapcsolási idősáv (fekete képernyő)
+                  </span>
+                </div>
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-semibold text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={settings.sleepEnabled}
+                    onChange={(e) =>
+                      setSettings({ ...settings, sleepEnabled: e.target.checked })
+                    }
+                    className="accent-cyan-500"
+                  />
+                  Bekapcsolva
+                </label>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-xs text-slate-400">
+                    Kikapcsolás (este)
+                  </label>
+                  <input
+                    type="time"
+                    value={settings.sleepStart}
+                    onChange={(e) =>
+                      setSettings({ ...settings, sleepStart: e.target.value })
+                    }
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-400">
+                    Visszakapcsolás (reggel)
+                  </label>
+                  <input
+                    type="time"
+                    value={settings.sleepEnd}
+                    onChange={(e) =>
+                      setSettings({ ...settings, sleepEnd: e.target.value })
+                    }
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
+                  />
+                </div>
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-2.5 text-xs text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={settings.sleepWeekends}
+                  onChange={(e) =>
+                    setSettings({ ...settings, sleepWeekends: e.target.checked })
+                  }
+                  className="accent-cyan-500"
+                />
+                <span>Hétvégén (szombat–vasárnap) egész nap fekete képernyő</span>
+              </label>
+
+              <p className="text-xs text-slate-400">
+                A megadott idősávban a kijelző teljesen fekete képernyőre vált, majd a
+                reggeli időpontban automatikusan visszakapcsol és folytatja a carouselt.
+              </p>
             </div>
 
             <div className="flex items-center gap-4">
