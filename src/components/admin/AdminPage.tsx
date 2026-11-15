@@ -9,6 +9,7 @@ import {
   Atom,
   Calendar as CalendarIcon,
   CheckCircle2,
+  Download,
   ExternalLink,
   Lightbulb,
   LogIn,
@@ -19,9 +20,11 @@ import {
   Settings,
   ShieldCheck,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { parseEventsCsv, SAMPLE_CSV_CONTENT } from '../../services/csvEvents';
 import { AdminCalendar } from './AdminCalendar';
 import {
   auth,
@@ -105,7 +108,9 @@ export function AdminPage() {
   const [evDate, setEvDate] = useState(todayStr());
   const [evTime, setEvTime] = useState('14:30');
   const [evLocation, setEvLocation] = useState('');
-  const [evCategory, setEvCategory] = useState<EventCategory>('fizika');
+  const [evCategory, setEvCategory] = useState<EventCategory>('termeszettudomany');
+  const [csvStatus, setCsvStatus] = useState<string | null>(null);
+  const [csvImporting, setCsvImporting] = useState(false);
 
   // Fun fact űrlap
   const [ffText, setFfText] = useState('');
@@ -190,6 +195,43 @@ export function AdminPage() {
     });
     setEvTitle('');
     setEvLocation('');
+  };
+
+  const handleDownloadSampleCsv = () => {
+    const blob = new Blob([SAMPLE_CSV_CONTENT], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'minta_esemenyek.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvImporting(true);
+    setCsvStatus(null);
+    try {
+      const text = await file.text();
+      const { events: parsed, skippedRows } = parseEventsCsv(text);
+      if (parsed.length === 0) {
+        setCsvStatus('Nem található érvényes esemény a CSV fájlban.');
+      } else {
+        for (const ev of parsed) {
+          await addEvent(ev);
+        }
+        setCsvStatus(
+          `${parsed.length} esemény sikeresen importálva.` +
+            (skippedRows > 0 ? ` (${skippedRows} hibás sor kihagyva)` : '')
+        );
+      }
+    } catch {
+      setCsvStatus('Hiba történt a CSV fájl feldolgozása közben.');
+    } finally {
+      setCsvImporting(false);
+      e.target.value = '';
+    }
   };
 
   const handleAddFunFact = async (e: React.FormEvent) => {
@@ -537,6 +579,7 @@ export function AdminPage() {
                       onChange={(e) => setEvCategory(e.target.value as EventCategory)}
                       className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
                     >
+                      <option value="termeszettudomany">Természettudomány</option>
                       <option value="fizika">Fizika</option>
                       <option value="kemia">Kémia</option>
                       <option value="biologia">Biológia</option>
@@ -554,6 +597,41 @@ export function AdminPage() {
                   Hozzáadás a naptárhoz
                 </button>
               </form>
+
+              {/* CSV tömeges feltöltés */}
+              <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-bold text-white">
+                    Események feltöltése CSV fájlból
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={handleDownloadSampleCsv}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-slate-700"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Minta CSV letöltése
+                  </button>
+                </div>
+                <p className="text-xs text-slate-400">
+                  Oszlopok: <code>datum;ido;esemeny;helyszin;tantargy</code> (vesszővel és
+                  pontosvesszővel is működik, pl. Excelből mentve).
+                </p>
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-950/60 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-500/60 hover:text-cyan-300">
+                  <Upload className="h-4 w-4" />
+                  <span>{csvImporting ? 'Importálás folyamatban...' : 'CSV fájl kiválasztása'}</span>
+                  <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    disabled={csvImporting}
+                    onChange={handleCsvUpload}
+                    className="hidden"
+                  />
+                </label>
+                {csvStatus && (
+                  <p className="text-xs font-medium text-emerald-300">{csvStatus}</p>
+                )}
+              </div>
 
               <div className="space-y-2.5">
                 <h3 className="text-xs font-bold tracking-wider text-slate-400 uppercase">

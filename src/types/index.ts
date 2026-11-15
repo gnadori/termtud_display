@@ -11,6 +11,7 @@ export interface Announcement {
 }
 
 export type EventCategory =
+  | 'termeszettudomany'
   | 'fizika'
   | 'kemia'
   | 'biologia'
