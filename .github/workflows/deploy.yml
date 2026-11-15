@@ -30,15 +30,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Prepare .env from TERMTUD_DISPLAY_VAR
+        if: ${{ (secrets.TERMTUD_DISPLAY_VAR || vars.TERMTUD_DISPLAY_VAR) != '' }}
         env:
-          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY || vars.VITE_FIREBASE_API_KEY }}
-          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN || vars.VITE_FIREBASE_AUTH_DOMAIN }}
-          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID || vars.VITE_FIREBASE_PROJECT_ID }}
-          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET || vars.VITE_FIREBASE_STORAGE_BUCKET }}
-          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID || vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID || vars.VITE_FIREBASE_APP_ID }}
-          VITE_ALLOWED_ADMIN_DOMAIN: ${{ secrets.VITE_ALLOWED_ADMIN_DOMAIN || vars.VITE_ALLOWED_ADMIN_DOMAIN }}
+          RAW_ENV: ${{ secrets.TERMTUD_DISPLAY_VAR || vars.TERMTUD_DISPLAY_VAR }}
+        run: |
+          printf '%s\n' "$RAW_ENV" | sed 's/ *= */=/' | grep -E '^[A-Za-z0-9_]+=' > .env
+
+      - name: Build
         run: npm run build
 
       - name: Upload artifact
