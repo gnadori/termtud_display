@@ -40,6 +40,7 @@ import {
   deleteAnnouncement,
   deleteEvent,
   deleteFunFact,
+  replaceAllEvents,
   saveSettings,
   subscribeAnnouncements,
   subscribeEvents,
@@ -111,6 +112,7 @@ export function AdminPage() {
   const [evCategory, setEvCategory] = useState<EventCategory>('termeszettudomany');
   const [csvStatus, setCsvStatus] = useState<string | null>(null);
   const [csvImporting, setCsvImporting] = useState(false);
+  const [csvOverwrite, setCsvOverwrite] = useState(true);
 
   // Fun fact űrlap
   const [ffText, setFfText] = useState('');
@@ -218,12 +220,17 @@ export function AdminPage() {
       if (parsed.length === 0) {
         setCsvStatus('Nem található érvényes esemény a CSV fájlban.');
       } else {
-        for (const ev of parsed) {
-          await addEvent(ev);
+        if (csvOverwrite) {
+          await replaceAllEvents(parsed);
+        } else {
+          for (const ev of parsed) {
+            await addEvent(ev);
+          }
         }
         setCsvStatus(
-          `${parsed.length} esemény sikeresen importálva.` +
-            (skippedRows > 0 ? ` (${skippedRows} hibás sor kihagyva)` : '')
+          `${parsed.length} esemény sikeresen ${
+            csvOverwrite ? 'felülírva' : 'hozzáadva'
+          }.` + (skippedRows > 0 ? ` (${skippedRows} hibás sor kihagyva)` : '')
         );
       }
     } catch {
@@ -617,6 +624,15 @@ export function AdminPage() {
                   Oszlopok: <code>datum;ido;esemeny;helyszin;tantargy</code> (vesszővel és
                   pontosvesszővel is működik, pl. Excelből mentve).
                 </p>
+                <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={csvOverwrite}
+                    onChange={(e) => setCsvOverwrite(e.target.checked)}
+                    className="accent-cyan-500"
+                  />
+                  <span>Meglévő naptári események felülírása (törli a korábbiakat)</span>
+                </label>
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-950/60 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-500/60 hover:text-cyan-300">
                   <Upload className="h-4 w-4" />
                   <span>{csvImporting ? 'Importálás folyamatban...' : 'CSV fájl kiválasztása'}</span>

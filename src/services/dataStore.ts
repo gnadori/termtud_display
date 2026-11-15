@@ -3,11 +3,13 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
   setDoc,
   updateDoc,
+  writeBatch,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase/config';
 import type {
@@ -39,98 +41,13 @@ const STORAGE_KEYS = {
   settings: 'ttd_settings_v1',
 };
 
-function todayOffsetDate(daysOffset: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + daysOffset);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
 function seedDemoDataIfEmpty() {
   if (!localStorage.getItem(STORAGE_KEYS.announcements)) {
-    const demoAnnouncements: Announcement[] = [
-      {
-        id: 'demo-ann-1',
-        title: 'Kémia szakkör – szerda 15:00',
-        body: 'Ezen a héten lángfestés és redoxireakciók a 204-es laborban. Köpeny kötelező!',
-        priority: 'normal',
-        active: true,
-        createdAt: Date.now() - 3600_000,
-        updatedAt: Date.now() - 3600_000,
-      },
-      {
-        id: 'demo-ann-2',
-        title: 'Fizika OKTV konzultáció',
-        body: 'Pénteken 14:15-től felkészítő foglalkozás az emelt szintű érettségizőknek és versenyzőknek.',
-        priority: 'urgent',
-        active: true,
-        createdAt: Date.now() - 7200_000,
-        updatedAt: Date.now() - 7200_000,
-      },
-      {
-        id: 'demo-ann-3',
-        title: 'Mikroszkópia gyakorlat',
-        body: 'A biológia szertárban megtekinthetők az új preparátumok nagyszünetekben.',
-        priority: 'normal',
-        active: true,
-        createdAt: Date.now() - 10800_000,
-        updatedAt: Date.now() - 10800_000,
-      },
-    ];
-    localStorage.setItem(STORAGE_KEYS.announcements, JSON.stringify(demoAnnouncements));
+    localStorage.setItem(STORAGE_KEYS.announcements, JSON.stringify([]));
   }
 
   if (!localStorage.getItem(STORAGE_KEYS.events)) {
-    const demoEvents: CalendarEvent[] = [
-      {
-        id: 'demo-ev-1',
-        title: 'Biológia labor: Sejtosztódás vizsgálata',
-        date: todayOffsetDate(0),
-        time: '14:30',
-        location: 'Biológia előadó',
-        category: 'biologia',
-        createdAt: Date.now(),
-      },
-      {
-        id: 'demo-ev-2',
-        title: 'Csillagászati szakkör – Távcsöves észlelés',
-        date: todayOffsetDate(1),
-        time: '18:00',
-        location: 'Tetőterasz',
-        category: 'fizika',
-        createdAt: Date.now(),
-      },
-      {
-        id: 'demo-ev-3',
-        title: 'Kémia kísérleti délután',
-        date: todayOffsetDate(2),
-        time: '15:00',
-        location: '204-es labor',
-        category: 'kemia',
-        createdAt: Date.now(),
-      },
-      {
-        id: 'demo-ev-4',
-        title: 'Földrajz verseny – Iskolai forduló',
-        date: todayOffsetDate(4),
-        time: '13:30',
-        location: '112-es terem',
-        category: 'verseny',
-        createdAt: Date.now(),
-      },
-      {
-        id: 'demo-ev-5',
-        title: 'Robotika és szenzorika műhely',
-        date: todayOffsetDate(6),
-        time: '15:30',
-        location: 'Fizika szertár',
-        category: 'fizika',
-        createdAt: Date.now(),
-      },
-    ];
-    localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(demoEvents));
+    localStorage.setItem(STORAGE_KEYS.events, JSON.stringify([]));
   }
 
   if (!localStorage.getItem(STORAGE_KEYS.funFacts)) {
@@ -326,6 +243,31 @@ export async function deleteEvent(id: string): Promise<void> {
     return;
   }
   await deleteDoc(doc(db, 'events', id));
+}
+
+export async function replaceAllEvents(
+  newEvents: Array<Omit<CalendarEvent, 'id' | 'createdAt'>>
+): Promise<void> {
+  const now = Date.now();
+  if (!isFirebaseConfigured || !db) {
+    const seeded: CalendarEvent[] = newEvents.map((ev, i) => ({
+      ...ev,
+      id: `local-${now}-${i}`,
+      createdAt: now + i,
+    }));
+    writeLocal(STORAGE_KEYS.events, seeded);
+    return;
+  }
+
+  const colRef = collection(db, 'events');
+  const existing = await getDocs(colRef);
+  const batch = writeBatch(db);
+  existing.docs.forEach((d) => batch.delete(d.ref));
+  newEvents.forEach((ev, i) => {
+    const newRef = doc(colRef);
+    batch.set(newRef, { ...ev, createdAt: now + i });
+  });
+  await batch.commit();
 }
 
 export async function addFunFact(
