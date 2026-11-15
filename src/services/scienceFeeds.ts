@@ -207,7 +207,7 @@ export function describeWeatherCode(code: number): string {
 
 // 4. Napfolt- és napszél-tevékenység (NOAA SWPC + NASA SDO)
 export async function fetchSpaceWeather(): Promise<SpaceWeatherData> {
-  const cacheKey = 'ttd_cache_space';
+  const cacheKey = 'ttd_cache_space_v2';
   const cached = getCache<SpaceWeatherData>(cacheKey, 15 * 60 * 1000);
   if (cached) return cached;
 
@@ -220,20 +220,32 @@ export async function fetchSpaceWeather(): Promise<SpaceWeatherData> {
     fetch('https://services.swpc.noaa.gov/products/summary/solar-wind-speed.json')
       .then((r) => r.json())
       .then((d) => {
-        if (d?.WindSpeed) solarWindSpeed = Number(d.WindSpeed);
+        const item = Array.isArray(d) ? d[d.length - 1] : d;
+        const speed = item?.proton_speed ?? item?.WindSpeed;
+        if (speed !== undefined && speed !== null && !Number.isNaN(Number(speed))) {
+          solarWindSpeed = Math.round(Number(speed));
+        }
       }),
     fetch('https://services.swpc.noaa.gov/products/summary/solar-wind-mag-field.json')
       .then((r) => r.json())
       .then((d) => {
-        if (d?.Bt !== undefined) bt = Number(d.Bt);
-        if (d?.Bz !== undefined) bz = Number(d.Bz);
+        const item = Array.isArray(d) ? d[d.length - 1] : d;
+        const btVal = item?.bt ?? item?.Bt;
+        const bzVal = item?.bz_gsm ?? item?.Bz;
+        if (btVal !== undefined && btVal !== null && !Number.isNaN(Number(btVal))) {
+          bt = Number(btVal);
+        }
+        if (bzVal !== undefined && bzVal !== null && !Number.isNaN(Number(bzVal))) {
+          bz = Number(bzVal);
+        }
       }),
     fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json')
       .then((r) => r.json())
       .then((rows) => {
-        if (Array.isArray(rows) && rows.length > 1) {
+        if (Array.isArray(rows) && rows.length > 0) {
           const last = rows[rows.length - 1];
-          const val = Number(last?.[1]);
+          const rawKp = Array.isArray(last) ? last[1] : last?.Kp ?? last?.kp;
+          const val = Number(rawKp);
           if (!Number.isNaN(val)) kpIndex = val;
         }
       }),
